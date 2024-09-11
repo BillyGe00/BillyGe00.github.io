@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 1</title>
+        <link rel="stylesheet" href="../style/project1_style.css">
+    </head>
+
+    <body>
+        <div class="main">
+            <h1>Project 1</h1>
+
+            <h2>Project Description</h2>
+            <div class="project description">
+                <h3>Sergei Mikhailovich Prokudin-Gorskii (1863-1944) was a pioneer photographer in the 20th century. He envisioned color photography in a monochrome world, and he took actions by recording three exposures of every scene onto a glass plate using a red, a green, and a blue filter. His photos depicted the last years of the Russian Empire. They were purchased in 1948 by the Library of Congress, digitized, colored, and made public <a href="https://www.loc.gov/exhibits/empire/making.html" target="_blank">online</a>.
+                    <br><br>
+                    The goal in this project is to take the digitized Prokudin-Gorskii glass plate images (three monochrome ones) and, using image processing techniques, automatically produce a single color image with as few visual artifacts as possible.
+                    <br><br>
+                    The challenge I have to solve is image alignment, since it is rarely possible to ask an object to remain stationary as Prokudin-Gorskii took his three monochrome photos, which is also the key flaw in his strategy.
+                </h3>
+            </div>
+
+            <h2>Small Size Image Alignment (exhaustive search)</h2>
+            <div class="small-size-image-alignment">
+                <h3>For small size images (jpg format), in which the total number of pixels of a monochrome photo is usually around 120k, I used exhaustive search in looking for the best alignment. Using the blue filter channel as reference, I aligned red and green filter channels by circular translating a search window of [-15, 15] in both the x and y axes according to either sum of squared distance (SSD) or normalized cross correlation (NCC) similarity score metric. In addition, I implemented the option to crop 2% on all four sides in each of the monochrome photos before alignment, in order to remove the impacts of black borders.
+                    <br><br>
+                    From my experience, the two similarity score metrics do not have a difference in results, but the choice in cropping does. Below are example small size images, which include the best red and green channel displacements as well as whether they are cropped.
+                </h3>
+                <div class="example-small-image">
+                    <hr>
+                    <h5>cathedral</h5>
+                    <div class="individual-small-image">
+                        <img src="small image examples/cathedral.jpg" height="500">
+                        <h4>original</h4>
+                    </div>
+                    <div class="individual-small-image">
+                        <img src="small image examples/cathedral_ncc_false.jpg", height="500">
+                        <h4>green translation: [1, -1]<br>red translation: [7, -1]<br>no crop</h4>
+                    </div>
+                    <div class="individual-small-image">
+                        <img src="small image examples/cathedral_ncc_true.jpg", height="500">
+                        <h4>green translation: [5, 2]<br>red translation: [11, 3]<br>crop</h4>
+                    </div>
+                </div>
+                <div class="example-small-image">
+                    <hr>
+                    <h5>monastery</h5>
+                    <div class="individual-small-image">
+                        <img src="small image examples/monastery.jpg" height="500">
+                        <h4>original</h4>
+                    </div>
+                    <div class="individual-small-image">
+                        <img src="small image examples/monastery_ncc_false.jpg", height="500">
+                        <h4>green translation: [-6, 0]<br>red translation: [9, 1]<br>no crop</h4>
+                    </div>
+                    <div class="individual-small-image">
+                        <img src="small image examples/monastery_ncc_true.jpg", height="500">
+                        <h4>green translation: [-3, 0]<br>red translation: [3, 2]<br>crop</h4>
+                    </div>
+                </div>
+                <div class="example-small-image">
+                    <hr>
+                    <h5>tobolsk</h5>
+                    <div class="individual-small-image">
+                        <img src="small image examples/tobolsk.jpg" height="500">
+                        <h4>original</h4>
+                    </div>
+                    <div class="individual-small-image">
+                        <img src="small image examples/tobolsk_ncc_false.jpg", height="500">
+                        <h4>green translation: [3, 2]<br>red translation: [6, 3]<br>no crop</h4>
+                    </div>
+                    <div class="individual-small-image">
+                        <img src="small image examples/tobolsk_ncc_true.jpg", height="500">
+                        <h4>green translation: [3, 2]<br>red translation: [6, 3]<br>crop</h4>
+                    </div>
+                    <hr>
+                </div>
+                <h3>As shown above, cropping performs better than no cropping in cathedral and monastery. The two methods perform equally well in tobolsk.</h3>
+            </div>
+
+            <h2>Large Size Image Alignment (pyramid search)</h2>
+            <div class="large-size-image-alignment">
+                <div class="pyramid">
+                    <div class="pyramid-text">
+                        <p>For large size images (tif format), in which the total number of pixels of a monochrome photo is usually around 10 million, exhaustive search becomes terribly expensive computationally. To solve this challenge, I implemented an image pyramid algorithm.
+                            <br><br>
+                            After dividing the original photo Prokudin-Gorskii took into three monochrome ones, my image pyramid algorithm first downscales each image to the coarsest level, where the total number of pixels is less than 90k. At the coarsest level, I used exhaustive search, the same method used in small size image alignment, in a window of [-15, 15] for alignment. Then I upscales the image by a factor of 2 until it reaches the original image size. At each step in upscaling, I first double the best displacement found in the previous coarser level, then I refine this displacement in a search window of [-5, 5].
+                            <br><br>
+                            Similar to small size image alignment, I incorporated SSD and NCC as two similarity score metrics, as well as the option to crop 2% on all four sides in each of the monochrome photos before alignment. According to results, cropping always produces at least as well as the no cropping ones. In addition, the two similarity score metrics do not have significant performance differences. The computation cost for each color image generation is roughly 20 seconds.
+                        </p>
+                    </div>
+                    <div class="pyramid-image">
+                        <img src="image_pyramid_demo.png", height="275">
+                    </div>
+                </div>
+                <div class="large-image-one-line">
+                    <hr>
+                    <div class="individual-large-image">
+                        <h6>harvesters</h6>
+                        <img src="large image examples/harvesters_ncc_true.jpg", height="250">
+                        <h4>green translation: [60, 15]<br>red translation: [126, 13]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>icon</h6>
+                        <img src="large image examples/icon_ncc_true.jpg", height="250">
+                        <h4>green translation: [40, 17]<br>red translation: [89, 23]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>sculpture</h6>
+                        <img src="large image examples/sculpture_ncc_true.jpg", height="250">
+                        <h4>green translation: [33, -11]<br>red translation: [139, -26]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>three generations</h6>
+                        <img src="large image examples/three_generations_ncc_true.jpg", height="250">
+                        <h4>green translation: [52, 5]<br>red translation: [112, 7]</h4>
+                    </div>
+                </div>
+                <div class="large-image-one-line">
+                    <hr>
+                    <div class="individual-large-image">
+                        <h6>train</h6>
+                        <img src="large image examples/train_ncc_true.jpg", height="250">
+                        <h4>green translation: [43, 0]<br>red translation: [93, 31]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>church</h6>
+                        <img src="large image examples/church_ncc_true.jpg", height="250">
+                        <h4>green translation: [12, -8]<br>red translation: [25, -14]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>lady</h6>
+                        <img src="large image examples/lady_ncc_true.jpg", height="250">
+                        <h4>green translation: [56, -6]<br>red translation: [114, -16]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>melons</h6>
+                        <img src="large image examples/melons_ncc_true.jpg", height="250">
+                        <h4>green translation: [82, 4]<br>red translation: [155, -1]</h4>
+                    </div>
+                </div>
+                <div class="large-image-one-line">
+                    <hr>
+                    <div class="individual-large-image">
+                        <h6>onion church</h6>
+                        <img src="large image examples/onion_church_ncc_true.jpg", height="250">
+                        <h4>green translation: [52, 22]<br>red translation: [110, -1]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>self portrait</h6>
+                        <img src="large image examples/self_portrait_ncc_true.jpg", height="250">
+                        <h4>green translation: [113, -2]<br>red translation: [64, -6]</h4>
+                    </div>
+                    <div class="individual-large-image">
+                        <h6>emir</h6>
+                        <img src="large image examples/emir_ncc_true.jpg", height="250">
+                        <h4>green translation: [50, 23]<br>red translation: [38, 31]</h4>
+                    </div>
+                    <hr>
+                </div>
+                <h3>As shown above, the alignment performance is perfect in harvesters, icon, sculpture, three generations, and train. My pyramid algorithm works fine in church, lady, melons, and onion church, while it fails in self portrait and emir. If I change the cropping percentage from 2% to 5%, then church, lady, and onion church become perfect while harvesters and sculpture become fine.
+                    <br><br>
+                    In self portrait and emir, it seems that one of the three monochrome photos is shifting to the top from the other two. I think that maybe adding edges and gradients to my alignment features (red, green, blue) would solve the problem.
+                </h3>
+            </div>
+
+            <h2>Other Image Results</h2>
+            <div class="large-image-one-line">
+                <hr>
+                <div class="individual-large-image">
+                    <h6>adobe wall</h6>
+                    <img src="other image examples/adobe_wall_ncc_true.jpg", height="250">
+                    <h4>green translation: [3, 0]<br>red translation: [3, 0]</h4>
+                </div>
+                <div class="individual-large-image">
+                    <h6>cliff castle</h6>
+                    <img src="other image examples/cliff_castle_ncc_true.jpg", height="250">
+                    <h4>green translation: [-1, 0]<br>red translation: [15, 0]</h4>
+                </div>
+                <div class="individual-large-image">
+                    <h6>catholic monastery</h6>
+                    <img src="other image examples/catholic_monastery_ncc_true.jpg", height="250">
+                    <h4>green translation: [49, -3]<br>red translation: [101, -3]</h4>
+                </div>
+                <div class="individual-large-image">
+                    <h6>floodgates</h6>
+                    <img src="other image examples/floodgates_ncc_true.jpg", height="250">
+                    <h4>green translation: [48, 3]<br>red translation: [91, 3]</h4>
+                </div>
+                <hr>
+                <h3>These four images are taken from the Prokudin-Gorskii collection. Adobe wall and cliff castle are used to demonstrate small size image alignment, while catholic monastery and floodgates are used to test my pyramid algorithm.</h3>
+            </div>
+
+        </div>
+    </body>
+</html>
+
+

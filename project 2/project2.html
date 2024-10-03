@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 2</title>
+        <link rel="stylesheet" href="../style/project2_style.css">
+    </head>
+
+    <body>
+        <div class="main">
+
+            <h1>Project 2</h1>
+
+            <h2>Project Description</h2>
+            <h3>In this project, the goal is to have fun with filters and frequencies. The main operation I used is the gaussian convolution kernel. Through the gaussian filter, I am able to extract low frequencies from an image, which in turn enables me to also extract high frequencies from an image by subtracting the original image by its low frequencies. The low and high frequencies then lead to very interesting things, such as image sharpening (part 2.1), hybrid image (part 2.2), and image blending (parts 2.3 and 2.4).</h3>
+
+            <h2>Part 1.1 Finite Difference Operator</h2>
+            <h3>In this part, I am given two finite difference operators D_x and D_y, where D_x is a (1 * 2) matrix [1, -1] and D_y is a (2 * 1) matrix [1,-1]. By convolving the image with the finite difference operators, I found the partial derivatives in the x and y direction respectively. I then extracted the gradient magnitude image by taking the square root of the sum of the individual squares of the partial derivatives. To make an edge image, I binarized the gradient magnitude image with threshold = 0.28.</h3>
+            <hr>
+            <div class="part1-1">
+                <div class="individual-image">
+                    <img src="image_source/cameraman.png" height="200">
+                    <p>Original Image</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.1_dx.jpg" height="200">
+                    <p>D_x</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.1_dy.jpg" height="200">
+                    <p>D_y</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.1_gradient_magnitude.jpg" height="200">
+                    <p>Gradient Magnitude</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.1_edge.jpg" height="200">
+                    <p>Edge (threshold = 0.28)</p>
+                </div>
+            </div>
+            <hr>
+
+            <h2>Part 1.2 Derivative of Gaussian (DoG) Filter</h2>
+            <h3>
+                Since the edge image result of convolving the cameraman image directly with the finite difference operators is weak, I implemented two convolutions. The first convolution is the same as part 1.1, and the second is convolving with a gaussian filter with kernel size = 10 and sigma = 2. As shown, the resulting edge image is much more prominent due to reduction in high frequency noise by convolving with the gaussian low frequency filter.
+                <br><br>
+                There are two methods in implementation. The first method is to implement the two convolutions separately. I first convolved the cameraman image with the gaussian filter, then I convolved the low frequency image with the finite difference operators. The second method is to generate the gaussian filter which is convolved with the finite difference operators before lastly convolving with the cameraman image. Both methods produce exactly the same result.
+            </h3>
+            <hr>
+            <div class="part1-2">
+                <div class="take-place-as-an-image">
+                    <p>Two Convolutions</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_dx_single_convolution.jpg" height="200">
+                    <p>D_x</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_dy_single_convolutions.jpg" height="200">
+                    <p>D_y</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_gradient_magnitude_single_convolution.jpg" height="200">
+                    <p>Gradient Magnitude</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_edge_single_convolution.jpg" height="200">
+                    <p>Edge (threshold = 0.28)</p>
+                </div>
+                <br><br>
+                <hr>
+                <div class="take-place-as-an-image">
+
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_DoG_x_single_convolution_.jpg" height="200">
+                    <p>Gaussian D_x Filter</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_DoG_y_single_convolution_.jpg" height="200">
+                    <p>Gaussian D_y Filter</p>
+                </div>
+                <hr>
+                <div class="take-place-as-an-image">
+                    <p>Single Convolution</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_dx_two_convolutions.jpg" height="200">
+                    <p>D_x</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_dy_two_convolutions.jpg" height="200">
+                    <p>D_y</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_gradient_magnitude_two_convolutions.jpg" height="200">
+                    <p>Gradient Magnitude</p>
+                </div>
+                <div class="individual-image">
+                    <img src="image_output/part1.2_edge_two_convolutions.jpg" height="200">
+                    <p>Edge (threshold = 0.28)</p>
+                </div>
+            </div>
+            <hr>
+
+            <h2>Part 2.1 Image "Sharpening"</h2>
+            <h3>
+                Image sharpening is done by adding some high frequency details of an image to the original image to “sharpen” it. In order to extract high frequencies, I first need to blur the original image, then subtract the blurred image from the original image. As a result of some mathematical simplification, image sharpening can be implemented as one single filter.
+                <br><br>
+                In the two examples below, it is obvious that both images are sharpened. In other words, more details are added to the original image. In the case of Taj, since the original image contains some noise, the sharpened Taj looks better. On the other hand, since the original image of the elephant already contains a lot of details, the sharpened effect is not as good visually.
+            </h3>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/taj.jpg" height="300">
+                <p>Taj Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.1_taj.jpg" height="300">
+                <p>Taj sharpened</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/elephant.jpg" height="300">
+                <p>Elephant Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.1_elephant.jpg" height="300">
+                <p>Elephant Sharpened</p>
+            </div>
+            <hr>
+
+            <h2>Part 2.2 Hybrid Images</h2>
+            <h3>
+                A hybrid image is an image that changes according to viewing distance. It is made up by blending two different images together. The theory behind it is that humans perceive high frequency at a close distance and low frequency at a long distance.
+                <br><br>
+                My implementation involved four parts. First, I need to align two images. Second, I generated a separate gaussian filter for each image. Third, I pass each image to their associated gaussian filter to extract their low frequencies. For the image that I want to extract its high frequency, I subtract its low frequency from the original image. Lastly, I added the low frequency from one image and high frequency from the other image together and normalized.
+            </h3>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/biden.png" height="215">
+                <p>Biden Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_fft_biden_input.jpg" height="215">
+                <p>Log Magnitude FFT of Biden Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_biden_high_frequency_filter.jpg" height="215">
+                <p>Biden High Frequency</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_fft_biden_filter.jpg" height="215">
+                <p>Log Magnitude FFT of Biden High Frequency</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/harris.png" height="215">
+                <p>Harris Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_fft_harris_input.jpg" height="215">
+                <p>Log Magnitude FFT of Harris Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_harris_low_frequency_filter.jpg" height="215">
+                <p>Harris Low Frequency</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_fft_harris_filter.jpg" height="215">
+                <p>Log Magnitude FFT of Harris Low Frequency</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_output/part2.2_hybrid_biden_harris.jpg" height="400">
+                <p>Biden-Harris Hybrid</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_fft_hybrid.jpg" height="400">
+                <p>Log Magnitude FFT of Biden-Harris Hybrid</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/trump1.jpg" height="300">
+                <p>Trump 1 Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_source/trump2.jpg" height="300">
+                <p>Trump 2 Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_hybrid_trump12.jpg" height="300">
+                <p>Trump 1 and Trump 2 Hybrid</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/boat.png" height="200">
+                <p>Boat Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_source/car.png" height="200">
+                <p>Car Original</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.2_hybrid_car_boat.jpg" height="200">
+                <p>Boat-Car Hybrid</p>
+            </div>
+            <hr>
+            <h3>As shown above in my examples, the biden-harris hybrid performs pretty well because the two images are very similar to each other, which makes it easy to align. However,  the boat-car in particular looks bad. The reason is that the middle of the boat contains almost no edges, which makes the car visible both from a close and long viewing distance.</h3>
+
+            <h2>Part 2.3 Gaussian and Laplacian Stacks</h2>
+            <h3>The gaussian and laplacian stacks are used for multiresolution blending in part 2.4. The gaussian stack is generated by repeatedly convolving an image with a gaussian filter. The laplacian stack is generated by subtractions between successive low frequency images in the gaussian stack.</h3>
+            <hr>
+            <div class="take-place-as-an-image">
+                <p>Apple Gaussian Stack</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.3_apple_gaussian_stack.png" height="215">
+            </div>
+            <hr>
+            <div class="take-place-as-an-image">
+                <p>Apple Laplacian Stack</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.3_apple_laplacian_stack.png" height="215">
+            </div>
+            <hr>
+            <div class="take-place-as-an-image">
+                <p>Orange Gaussian Stack</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.3_orange_gaussian_stack.png" height="215">
+            </div>
+            <hr>
+            <div class="take-place-as-an-image">
+                <p>Orange Laplacian Stack</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.3_orange_laplacian_stack.png" height="215">
+            </div>
+            <hr>
+
+            <h2>Part 2.4 Multiresolution Blending</h2>
+            <h3>
+                Following the generation of gaussian and laplacian stacks, a blended image can be constructed by starting from the last level of the laplacian stack, using a gaussian mask to do a weighted sum at each level, and adding together all blended images.
+                <br><br>
+                In my examples, the oracle uses a vertical mask, the desert-plane uses a horizontal mask, and the golden-gate-bridge-rocket uses an irregular mask which I generated from photoshop.
+            </h3>
+            <hr>
+            <div class="take-place-as-an-image">
+                <p>Oraple!</p>
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.4_blend_oracle.png" height="400">
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/desert.png" height="250">
+            </div>
+            <div class="individual-image">
+                <img src="image_source/plane.png" height="250">
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.4_blend_desert_plane.png" height="250">
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="image_source/gg.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="image_source/rocket.jpg" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="image_source/rocket_mask.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="image_output/part2.4_blend_gg_rocket.png" height="200">
+            </div>
+            <hr>
+
+        </div>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

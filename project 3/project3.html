@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 3</title>
+        <link rel="stylesheet" href="../style/project3_style.css">
+    </head>
+
+    <body>
+        <div class="main">
+            <h1>Project 3</h1>
+
+            <h2>Project Description</h2>
+            <h3>The core of this project is face morphing, which involves two main parts: warp of image shape and cross-dissolve of image color. To morph a source face to a destination face, I first need to find the affine transformation matrix that maps the source face shape to the destination face shape based on correspondence points I manually label. Next, I use the inverse of the affine matrix to map the source face color to the destination face color. The first three parts in this project focuses on face morphing implementation.
+                <br><br>
+                The last three parts expand beyond simple morphing from one face to another. Part 4 centers around finding the average face of a population based on public, well-labeled face data, part 5 is about extrapolation from the population average face, and in part 6 I implemented flexible parameters for shape warp and color cross-dissolve separately, adding some fun. 
+            </h3>
+
+            <h2>Part 1 Defining Correspondences</h2>
+            <h3>In this part, I defined 47 correspondence points on Me and Lillard face images using <a href='https://cal-cs180.github.io/fa23/hw/proj3/tool.html' target="_blank">a public labeling tool</a>, and I chose to compute the triangulation of the Me face image and the results are shown below. There are in total 88 triangles.</h3>
+            <hr>
+            <div class="part1">
+                <div class="take-place-as-an-image">
+                    <p>Me</p>
+                </div>
+                <div class="individual-image">
+                    <img src="input_images/me_img.png" height="300">
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part1_me_triangulation.png" height="300">
+                </div>
+                <hr>
+                <div class="take-place-as-an-image">
+                    <p>Lillard</p>
+                </div>
+                <div class="individual-image">
+                    <img src="input_images/lillard_img.png" height="300">
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part1_lillard_triangulation.png" height="300">
+                </div>
+            </div>
+            <hr>
+
+            <h2>Part 2 Computing the "Mid-way Face"</h2>
+            <h3>This part lays the foundation for the entire project. In order to compute the mid-way face, there are four steps.
+                <br><br>
+                1) Find the average correspondence points, or the average shape. 2) Warp both Me and Lillard face images to the average shape by computing the affine transformation matrices. Each triangle between the source face image and the mid-way face image has a unique transformation matrix. 3) Use the inverse of the affine transformation matrices to interpolate color for each pixel inside a triangle. I used the “nearest neighbor” interpolation method to compute efficiently. 4) After morphing Me and Lillard separately into the mid-way face image, average their result images.            </h3>
+            <hr>
+            <div class="part2">
+                <div class="individual-image">
+                    <img src="input_images/me_img.png" height="250">
+                    <p>Me</p>
+                </div>
+                <div class="individual-image">
+                    <img src="input_images/lillard_img.png" height="250">
+                    <p>Lillard</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part2_midway_face.png" height="250">
+                    <p>Our Mid-way Face</p>
+                </div>
+            </div>
+            <hr>
+            <h3>Part 2 implementation took me a long time to debug, since I am not used to (x, y) coordinates constantly flipping.</h3>
+
+            <h2>Part 3 The Morph Sequence</h2>
+            <h3>Part 3 builds on top of part 2. It smoothly morphs Me to Lillard in 50 image frames, with each frame being similar to the mid-way face. The only difference is the weight in steps 1 and 4 from above. As the Me face morphs to the Lillard face, weight increases in my implementation. My part 3 implementation only has one weight parameter, whereas I modified this implementation to control warp and cross-dissolve separately in part 6.</h3>
+            <hr>
+            <div class="part3">
+                <div class="individual-image">
+                    <img src="output_images/part3_gif.gif" height="500">
+                </div>
+            </div>
+            <hr>
+            <h3>As shown above, it is obvious that there is a flaw where my hair left and right around frame 30 suddenly sticks out and then disappears around frame 40. I think that it is caused by imperfect correspondence points I defined in part 1. From the triangulation image in part 1, I only defined three correspondence points on the border of my hair. However, since my hair and lillard’s hair have a large difference, defining more correspondence points around the border of the hair shall be able to highlight this difference, thus solving the flaw in my morph sequence.</h3>
+
+            <h2>Part 4 The "Mean face" of a population</h2>
+            <h3>Also built on part 2, I compute the mean face of a population in part 4. The data comes from <a href='https://fei.edu.br/~cet/facedatabase.html'>the FEI database</a>, which contains 200 Brazilian individuals. There are many different versions of the data available on the public website. The version I am using contains two images for each individual, neutral and smiling. Each face image has the same dimension and all of them have correspondence points manually labeled.
+                <br><br>
+                The average face of the population is computed by the exact same steps described in part 2. The only difference is that the mid-way face contains only two source images whereas the population average face contains two hundred.
+            </h3>
+            <hr>
+            <div class="part4">
+                <div class="individual-image">
+                    <img src="output_images/part4_population_avg_face_neutral.png" height="300">
+                    <p>Population Average Neutral</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_population_avg_face_smiling.png" height="300">
+                    <p>Population Average Smiling</p>
+                </div>
+                <hr>
+                <div class="individual-image">
+                    <img src="output_images/part4_example1_original_neutral.png" height="300">
+                    <p>Example One Neutral</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_example1_warped_neutral.png" height="300">
+                    <p>Example One Neutral Warped</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_example1_original_smiling.png" height="300">
+                    <p>Example One Smiling</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_example1_warped_smiling.png" height="300">
+                    <p>Example One Smiling Warped</p>
+                </div>
+                <hr>
+                <div class="individual-image">
+                    <img src="output_images/part4_example2_original_neutral.png" height="300">
+                    <p>Example Two Neutral</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_example2_warped_neutral.png" height="300">
+                    <p>Example Two Neutral Warped</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_example2_original_smiling.png" height="300">
+                    <p>Example Two Smiling</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_example2_warped_smiling.png" height="300">
+                    <p>Example Two Smiling Warped</p>
+                </div>
+                <hr>
+                <div class="individual-image">
+                    <img src="input_images/me_img_pt4.png" height="300">
+                    <p>Me (resized and cropped)</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_me_morph_to_population_avg.png" height="300">
+                    <p>Me Warped to Population Average</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_population_avg_morph_to_me.png" height="300">
+                    <p>Population Average Warped to Me</p>
+                </div>
+            </div>
+            <hr>
+            <h3>Above are images of population averages, two individual examples of neutral and smiling, as well as Me warped to population average, and population average warped to Me.
+                <br><br>
+                In the two individual examples, the man’s face is larger whereas the women’s face is smaller compared to the population average. Therefore their warped faces are quite different from their originals.
+                <br><br>
+                In order to warp between Me and the population average, I had to resize and crop my original face image. The weird faces in those two images are caused by Me face including ears on the two sides, creating a false knowledge that my face is thinner than the population average.
+            </h3>
+
+            <h2>Part 5 Caricatures: Extrapolating from the mean</h2>
+            <h3>This part is very interesting. Taking the framework from part 2, this time we change step 1, where I do not warp Me to the population average. Instead, we warp Me to Me plus the difference between Me and population average in each triangle multiplied by a constant. The reasoning behind it is extrapolation. (Me - population) means what separates me from the population average the most. Through multiplying the difference by a constant number and adding it to Me correspondence points, I am able to highlight the most different features.
+                <br><br>
+                For example, as we go from alpha = 0.5 to alpha = 1.0, my face gets thinner and thinner. It is because the population average face is thinner than Me face. In addition, my right eyebrow has a large curve that most people do not have. In extrapolation, this distinction is highlighted too.
+            </h3>
+            <hr>
+            <div class="part5">
+                <div class="individual-image">
+                    <img src="input_images/me_img_pt5.png" height="300">
+                    <p>Me (grey)</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part5_extrapolation_alpha_0.5.png" height="300">
+                    <p>Alpha = 0.5</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part5_extrapolation_alpha_1.png" height="300">
+                    <p>Alpha = 1</p>
+                </div>
+            </div>
+            <hr>
+
+            <h2>Part 6 Bells and Whistles</h2>
+            <h3>In a way, I have already changed Me face to a different ethnicity in part 4, from Chinese to Brazilian. Here, I reshow the morphed images by just the shape, just the color, and both. In implementation, I modified part 3, where I now incorporate two weight parameters in controlling warp and cross-dissolve.
+                <br><br>
+                I found something interesting: the color only image is the same as Population Average Warped to Me in part 4. The reason is that in my implementation in this part, I create two morphed images before averaging them according to color weight. When I generate the color only morph, the shape I am wrapping to is essentially Me face. Therefore morphing Me to Population Average using color only is the same as Population Average warped to Me.
+            </h3>
+            <hr>
+            <div class="part6">
+                <div class="individual-image">
+                    <img src="input_images/me_img_pt5.png" height="250">
+                    <p>Me</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part4_population_avg_face_neutral.png" height="250">
+                    <p>Population Average</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part6_shape_only.png" height="250">
+                    <p>Shape Only</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part6_color_only.png" height="250">
+                    <p>Color Only</p>
+                </div>
+                <div class="individual-image">
+                    <img src="output_images/part6_both.png" height="250">
+                    <p>(Shape = 0.5, Color = 0.5)</p>
+                </div>
+            </div>
+            <hr>
+
+        </div>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

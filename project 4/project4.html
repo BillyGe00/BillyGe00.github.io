@@ -13,22 +13,160 @@
         <h1>Project 4</h1>
 
         <h2>Project Description Part One (Image Warping and Mosaicing)</h2>
-        <h4></h4>
+        <h4>
+            The first part of this project is to compute image mosaicing by manually labeling correspondence points for calculating the warping matrix. Unlike the affine matrix transformation used in face morphing which has 6 degrees of freedom in project 3, the projective warping matrix in image mosaicing has 8 degrees of freedom.
+            <br><br>
+            In part one, part 1.2 computes the homography warping matrix, parts 1.3 and 1.4 performs the actual image transformation through image rectification, and part 1.5 blends two images into a mosaic by combining all the pieces.
+        </h4>
 
         <h3>1.1 Shoot the Pictures</h3>
-        <h4></h4>
+        <h4>All pictures are taken with my iPhone XR. I downsized all of them from (4000, 3000) to (500, 375) in order to reduce computation cost. The gym cube and gym rules images are used for parts 1.3 and 1.4 as test cases before finally combining two images into a mosaic in part 1.5.</h4>
+        <hr>
+        <div class="part1.1">
+            <div class="individual-image">
+                <img src="input_data/gym_cube.png" height="400">
+                <p>Gym Cube</p>
+            </div>
+            <div class="individual-image">
+                <img src="input_data/gym_rules.png" height="400">
+                <p>Gym Rules Board</p>
+            </div>
+        </div>
+        <hr>
 
         <h3>1.2 Recover Homographies</h3>
-        <h4></h4>
+        <h4>
+            In order to compute the project warping matrix, I first need to manually label correspondence points. The minimum number of correspondence points is 4, due to the number of degrees of freedom in the transformation. I then set up a linear system of equations in the form of Ah = b, where h is a vector holding the 8 variables that defines the projective warping.
+            <br><br>
+            It is recommended to have more than 4 correspondence points, because doing so leads to the homography being more stable and less prone to noise. In that case, I used least squares to solve for h.
+        </h4>
+        <hr>
+        <div class="part1.2">
+            <div class="individual-image">
+                <img src="output_data/part1.2_gym_cube_correspondences1.png" height="375">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.2_gym_cube_correspondences2.png" height="375">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.2_gym_rules_correspondences1.png" height="375">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.2_gym_rules_correspondences2.png" height="375">
+            </div>
+        </div>
+        <hr>
 
         <h3>1.3 Warp the Images</h3>
-        <h4></h4>
+        <h4>
+            This part is very similar to the face morphing color interpolation in project 3. In fact, I copied and pasted my implementation over, then I made modifications to it. The main change is that projective transformation often leads to the transformed image being in a different shape than the original image. Therefore, prior to color interpolation using the inverse warping matrix, I first used the homography to map the four corners of the original input image to the output canvas. In addition, since not all pixels in the output image have their corresponding pixels in the original input image, I needed to generate a mask to find which those pixels are.
+            <br><br>
+            As shown in the gym rules example below, the viewing perspective of the gym rules board is now completely changed from the left side to the front of it. The shape of the output image is completely different from the shape of the input image. The black areas in the output image are pixels that do not have matches in the input image.
+        </h4>
+        <hr>
+        <div class="part1.3">
+            <div class="individual-image">
+                <img src="input_data/gym_rules.png" height="400">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.3_gym_rules_warped.png" height="400">
+            </div>
+        </div>
+        <hr>
         
         <h3>1.4 Image Rectification</h3>
-        <h4></h4>
+        <h4>As shown in the gym cube example below, not only can project transformation warp change the viewing perspective of an object (gym rules example above), it also has zoom in effects together with changing the viewing perspective if you label the correct correspondence points.</h4>
+        <hr>
+        <div class="part1.4">
+            <div class="individual-image">
+                <img src="input_data/gym_cube.png" height="400">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.4_gym_cube_warped.png" height="400">
+            </div>
+        </div>
+        <hr>
 
         <h3>1.5 Blend the Images into a Mosaic</h3>
-        <h4></h4>
+        <h4>
+            Before blending the images into a mosaic, I first had to be careful when taking pictures. The requirement is that the two images have to be taken with the same center of projection (COP).
+            <br><br>
+            In all my three examples below, I warped the left image to the projection of the right image. In other words, the right image is unwarped. The correspondence points I usually label are slightly more than 10. In order to align the warped image on the left to the unwarped image on the right, I used the align_image_code.py script provided in project 2.
+            <br><br>
+            If I were to blend the two images in a naive approach through simple addition, as we can see, the overlapped region is overly exposed. The seam around the border of the overlapping region is also super obvious. To solve the problem, I did two things. First, I used my multiresolution blending implementation from project 2, where I generated a Laplacian pyramid. In the mosaic use cases, a 2-level pyramid gives good performance. Second, I made modifications to the mask in my previous Laplacian pyramid. Previously, my simple mask was a horizontal or a vertical one dividing the canvas into half and half. In this project, I was able to make the mask adapt to each image mosaic shape. I did this by 1) create a binary mask for each image 2) identify the overlapping region 3) for pixels that are not in the overlapping region but has color values, set the mask pixel to 1, otherwise 0 is assigned 4) iterate over each pixel in the overlapping region, use distance transform to find out each pixel is closer to image 1 or image 2, assign 1 to the mask where the pixel is closer to and 0 to the mask where the pixel is farther from. 5) lastly, similar to my implementation in project 2, apply gaussian filter to both masks at each level of the pyramid.
+        </h4>
+        <hr>
+        <div class="part1.5">
+            <div class="individual-image">
+                <img src="input_data/kitchen_left.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="input_data/kitchen_center.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_left_correspondences.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_center_correspondences.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_left_warped_canvas.png" height="250">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_center_canvas.png" height="250">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_naive_mosaic.png" height="250">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_blended_mosaic.png" height="250">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_left_mask.png" height="400">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_center_mask.png" height="400">
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="input_data/pool_left.jpeg" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="input_data/pool_right.jpeg" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_pool_left_warped_canvas.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_pool_right_canvas.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_pool_naive_mosaic.png" height="400">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_pool_blended_mosaic.png" height="400">
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="input_data/parking_left.jpeg" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="input_data/parking_right.jpeg" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_parking_left_warped_canvas.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_parking_right_canvas.png" height="200">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_parking_naive_mosaic.png" height="400">
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part1.5_parking_blended_mosaic.png" height="400">
+            </div>
+        </div>
+        <hr>
 
         <h2>Project Description Part Two (Feature Matching for Autostitching)</h2>
         <h4></h4>
@@ -49,7 +187,9 @@
         <h4></h4>
 
         <h2>What Have I Learned?</h2>
-        <h4></h4>
+        <h4>
+            In part one, I was introduced to image mosaicing, which is fascinating. I did not expect that the trick behind google map street view is so simple. In implementation, I had a difficult time with the mask in the multiresolution pyramid. I tried many things, including doing a weighted average of the overlapping region horizontally. However, that method does not remove any of the vertical seams, which lead me to the bwdist method. The outputs are cool!
+        </h4>
 
     </div>
 </body>

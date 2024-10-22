@@ -169,27 +169,124 @@
         <hr>
 
         <h2>Project Description Part Two (Feature Matching for Autostitching)</h2>
-        <h4></h4>
+        <h4>
+            Rather than manually labeling the correspondence points for warping one image to the projection of the other, this second part of the project is about automatically labeling correspondence points. The algorithm is simplified but grounded in the following paper: <a href="https://inst.eecs.berkeley.edu/~cs180/fa24/hw/proj4/Papers/MOPS.pdf" target="_blank">Multi-Image Matching using Multi-Scale Oriented Patches</a>.
+            <br><br>
+            Part 2.1 detects corner features using the Harris method. The adaptive non-maximal suppression is applied afterwards to refine the detected corners. Part 2.2 extracts a feature descriptor for each corner point. For each corner point, I first selected a 40 * 40 window, then resized it to a 8 * 8 window. Part 2.3 matches the feature descriptors between two images by computing the ratio of the first and second nearest neighbor based on the sum of squared distance metric. Part 2.4 then refines the matches using RANSAC to remove outliers. Part 2.5 finally uses the automatically labeled correspondence points to blend two images into a mosaic, similar to part 1.5.
+        </h4>
 
         <h3>2.1 Detecting Corner Features in an Image</h3>
-        <h4></h4>
+        <h4>
+            In this part, the Harris corner detection algorithm is provided. The outputs are shown below.
+            <br><br>
+            Due to the large number of corners detected, I used the adaptive non-maximal suppression method to sample, so that I am able to both reduce the number of corners detected but also make sure that the corners are evenly distributed in space. In the kitchen example, I set the parameter to reduce the number of corners from roughly 4000 to 500.
+        </h4>
+        <hr>
+        <div class="part2.1">
+            <div class="individual-image">
+                <img src="output_data/part2.1_kitchen_left_harris_corners.png" height="225">
+                <p>kitchen left Harris corners (4000)</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.1_kitchen_center_harris_corners.png" height="225">
+                <p>kitchen right Harris corners (4000)</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.1_kitchen_left_anms.png" height="225">
+                <p>kitchen left ANMS (500)</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.1_kitchen_center_anms.png" height="225">
+                <p>kitchen right ANMS (500)</p>
+            </div>
+        </div>
+        <hr>
 
         <h3>2.2 Extracting a Feature Descriptor for Each Feature Point</h3>
-        <h4></h4>
+        <h4>This part extracts a feature descriptor for each corner point from part 2.1. The feature descriptor is originally a 40 * 40 window centered at each corner point, but I resized it to a 8 * 8 patch with gaussian blurring to protect against aliasing. Every patch is normalized. </h4>
 
         <h3>2.3 Matching Feature Descriptors Between Two Images</h3>
-        <h4></h4>
+        <h4>Using feature descriptors from part 2.2, I matched corners between two images by computing the ratio of the first nearest neighbor with the second nearest neighbor based on the sum of squared distance metric on the feature descriptors. It is the eNN1 / eNN2 algorithm as proposed in the paper. Below shows the matched corner points in the kitchen example, and a pair of matching feature descriptors. As we can easily see, the matched corner points are not perfect, which still contains some outliers.</h4>
+        <hr>
+        <div class="part2.3">
+            <div class="individual-image">
+                <img src="output_data/part2.3_kitchen_left_post_feature_matching.png" height="225">
+                <p>kitchen left <br> feature descriptor match</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.3_kitchen_center_post_feature_matching.png" height="225">
+                <p>kitchen right <br> feature descriptor match</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.3_kitchen_left_feature_descriptor_match_example.png" height="225">
+                <p>kitchen left <br> feature descriptor example</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.3_kitchen_center_feature_descriptor_match_example.png" height="225">
+                <p>kitchen right <br> feature descriptor example</p>
+            </div>
+        </div>
+        <hr>
         
         <h3>2.4 Use RANSAC to Compute a Homography</h3>
-        <h4></h4>
+        <h4>To remove the outliers mentioned in part 2.3, I used the random sampling consensus (RANSAC) algorithm. The algorithm works by randomly selecting four corner matches and compute a homography transformation matrix based on them. Assuming these four matches are the correct ones, we then use the same homography to transform all of the corner points from image 1 to image 2. We then calculate the sum of squared distance between the transformed image 1 corner points and matched image 2 corner points. We count the number of correct matches by setting a threshold, where I used 1 pixel. We iterate this process for a large number of times and save the homography with the largest number of correct matches. As shown below, the kitchen example bow contains only the correct corner matches. </h4>
+        <hr>
+        <div class="part2.4">
+            <div class="individual-image">
+                <img src="output_data/part2.4_kitchen_left_ransac.png" height="400">
+                <p>kitchen left final correspondence points</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.4_kitchen_center_ransac.png" height="400">
+                <p>kitchen right final correspondence points</p>
+            </div>
+        </div>
+        <hr>
 
         <h3>2.5 Proceed as in Part One to Produce a Mosaic</h3>
-        <h4></h4>
+        <h4>
+            There is nothing special in this part. I blended two images based on the correspondence points found. Please check out the detailed steps in part 1.5.
+            <br><br>
+            By comparing the results between manually labeled correspondences in part 1 and automatically labeled correspondences in part 2, there are actually some differences. Generally, the manually labeled results are better, as shown in the kitchen and pool examples. In both cases the kitchen and pool outputs from manually labeled correspondences are almost perfect, whereas the kitchen draws stick out and the poolside is discontinued in the automatically labeled outputs. The two methods produce similar results in the parking example. Demonstrated with the kitchen example, I have a few words of explanation for their difference.
+            <br><br>
+            If we take a closer look at the correspondence points used to compute the homography matrix between the two methods, we see an obvious difference. The manually labeled correspondence points are much more spread out in the kitchen example, especially in the horizontal space compared to the automatically labeled ones. I believe that I am able to manually add two corner points to the automatically labeled set, one on the top right corner of the fridge and one in the middle of the two towels hanging on the oven, the result can be much better. Same explanation also applies to the pool example. Although the automatic method produces only 6 matching correspondences, the pool example actually has 20. I do want to point this out because the issue is not the number of correspondence points found, but rather how these correspondences are spread out in space. The other solution to this problem is to have the two images overlap more with each other while shooting them.
+        </h4>
+        <hr>
+        <div class="part2.5">
+            <div class="individual-image">
+                <img src="output_data/part1.5_kitchen_blended_mosaic.png" height="400">
+                <p>kitchen manually labeled blended</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.5_kitchen_mosaic.png" height="400">
+                <p>kitchen automatically labeled blended</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="output_data/part1.5_pool_blended_mosaic.png" height="400">
+                <p>pool manually labeled blended</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.5_pool_mosaic.png" height="400">
+                <p>pool automatically labeled blended</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="output_data/part1.5_parking_blended_mosaic.png" height="400">
+                <p>parking manually labeled blended</p>
+            </div>
+            <div class="individual-image">
+                <img src="output_data/part2.5_parking_mosaic.png" height="400">
+                <p>parking automatically labeled blended</p>
+            </div>
+        </div>
+        <hr>
 
         <h2>What Have I Learned?</h2>
         <h4>
             In part one, I was introduced to image mosaicing, which is fascinating. I did not expect that the trick behind google map street view is so simple. In implementation, I had a difficult time with the mask in the multiresolution pyramid. I tried many things, including doing a weighted average of the overlapping region horizontally. However, that method does not remove any of the vertical seams, which lead me to the bwdist method. The outputs are cool!
+            <br><br>
+            In part two, the implementations were pretty smooth for me. I just had a difficult time debugging why the final output is not as good as the manually labeled ones, but I ended up finding nothing. I believe that my explanation makes sense.
         </h4>
-
     </div>
 </body>

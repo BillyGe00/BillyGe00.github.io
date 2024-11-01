@@ -6,5 +6,5 @@ You can view the portfolio website here: http://BillyGe00.github.io.
 * project 2: Filters and Frequencies
 * project 3: Face Morphing
 * project 4: Stitching Photo Mosaics
-* project 5: Neural Radiance Field
+* project 5: Diffusion Models
 * final project: 

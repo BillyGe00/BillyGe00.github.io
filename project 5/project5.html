@@ -16,7 +16,7 @@
         <h4>
             In part A of this project, I play around with DeepFloyd pre-trained diffusion model, including implementing diffusion sampling loops and using them for other tasks such as inpainting and creating optical illusions. DeepFloyd was trained as a text-to-image model, which takes text prompts as input and outputs images that are aligned with the text.
             <br><br>
-            The instruction for part A can be found <a href="https://cal-cs180.github.io/fa24/hw/proj5/parta.html" target="_blank">here</a>.
+            The instructions for part A can be found <a href="https://cal-cs180.github.io/fa24/hw/proj5/parta.html" target="_blank">here</a>.
         </h4>
 
         <h3>PartA 0 Sampling from the Model</h3>
@@ -721,10 +721,14 @@
         <hr>
 
         <h2>Project Description Part B (Diffusion Models from Scratch)</h2>
-        <h4></h4>
+        <h4>
+            In part B of this project, I train my own diffusion model on the MNIST dataset, which contains hand-written ten-digit images. There are 60k training images and 10k testing images. 
+            <br><br>
+            The instructions for part B can be found <a href="https://cal-cs180.github.io/fa24/hw/proj5/partb.html" target="_blank">here</a>.
+        </h4>
 
         <h3>PartB 1 Training a Single-Step Denoising U-Net</h3>
-        <h4></h4>
+        <h4>In order to train a single-step denoising UNet, I followed the architecture instructions step by step. First, I wrote the add_noise function, in which sigma represents how much noise to add to an input image. Larger sigma values mean more noisy images. Second, I implemented the simple and composed operations, as well as the UnconditionalUNet and train functions. Third, I train the model with 5 epochs and a batch size of 256. The computation cost using T4 GPU on google colab is 7 minutes.</h4>
         <hr>
         <div class="partb_1.2">
             <div class="individual-image">
@@ -774,6 +778,11 @@
             </div>
         </div>
         <hr>
+        <h4>
+            We compare the model performance between epoch 1 and epoch 5. It is obvious that the epoch 1 model produces somewhat grayish outputs whereas the epoch 5 model produces outputs closest to the clean images.
+            <br><br>
+            Since the input noisy images in our model all share a sigma value equal to 0.5, we want to know whether our model performs well on other levels of noisy input images. As shown in the above example, it seems that our model is able to denoise pretty well on sigma values less than or equal to 0.8.
+        </h4>
 
         <h3>PartB 2 Training a Diffusion Model</h3>
         <h4></h4>

@@ -724,6 +724,8 @@
         <h4>
             In part B of this project, I train my own diffusion model on the MNIST dataset, which contains hand-written ten-digit images. There are 60k training images and 10k testing images. 
             <br><br>
+            In partB 1, I implemented a single-step denoising network, similar to partA 1.3. In partB 2, I added time-conditioning and class-conditioning to the single-step denoising UNet.
+            <br><br>
             The instructions for part B can be found <a href="https://cal-cs180.github.io/fa24/hw/proj5/partb.html" target="_blank">here</a>.
         </h4>
 
@@ -781,11 +783,70 @@
         <h4>
             We compare the model performance between epoch 1 and epoch 5. It is obvious that the epoch 1 model produces somewhat grayish outputs whereas the epoch 5 model produces outputs closest to the clean images.
             <br><br>
-            Since the input noisy images in our model all share a sigma value equal to 0.5, we want to know whether our model performs well on other levels of noisy input images. As shown in the above example, it seems that our model is able to denoise pretty well on sigma values less than or equal to 0.8.
+            Since the input noisy images (training data) in our model all share a sigma value equal to 0.5, we want to know whether our model performs well on other levels of noisy input images. As shown in the above example, it seems that our model is able to denoise pretty well on sigma values less than or equal to 0.8.
         </h4>
 
-        <h3>PartB 2 Training a Diffusion Model</h3>
-        <h4></h4>
+        <h3>PartB 2 Training a Diffusion Model (Time-Conditioning)</h3>
+        <h4>
+            In this part, I made some minor changes to the single-step denoising UNet. In particular, I added the embedding of the denoising step (t) to the decoding layers twice in the architecture. In addition, while the single-step UNet outputs a clean image recovered from the noisy input image, the time-conditional UNet outputs the white noise image that is used in the noise process. Lastly, this part is similar to partA 1.4 in that we now iteratively denoise an image rather than denoising in a single step.
+            <br><br>
+            I trained the model with 20 epochs and a batch size of 128. The computation cost using T4 GPU on google colab is 15 minutes.
+        </h4>
+        <hr>
+        <div class="partb_2_time_conditioning">
+            <div class="individual-image">
+                <img src="output_data/partb2/partb2.2_training_loss.png" height="500">
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="output_data/partb2/partb2.3_sampling_epoch5.png" height="1000">
+            </div>
+            <div class="take-place-as-an-image">
+                <p>Checkpoint Model Output 5th Epoch</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="output_data/partb2/partb2.3_sampling_epoch20.png" height="1000">
+            </div>
+            <div class="take-place-as-an-image">
+                <p>Checkpoint Model Output 20th Epoch</p>
+            </div>
+        </div>
+        <hr>
+        <h4>
+            After training the time-conditional UNet, I sampled 50 white noise images and made the model denoise. We compared the model performance between epoch 5 and epoch 20. It is obvious that the epoch 20 model outperforms the epoch 5 model. While the epoch 5 model generates digit images which are completely unrecognizable roughly half of the time, the epoch 20 model generates recognizable images almost all the time, despite a few defects such as digit 0 closing the circle. 
+            <br><br>
+            For unknown reasons, my randomly sampled test cases contain digits 6, 8, and 0 mostly. I am unsure whether this is due to model learning.
+        </h4>
+
+        <h3>PartB 2 Training a Diffusion Model (Time-and-Class-Conditioning)</h3>
+        <h4>
+            This part is similar to partA 1.6 where I added classifier-free guidance to the time-conditional UNet. In terms of the architecture, I added the embedding of a class label (one-hot encoded) to the same layers where I added time-conditioning in the decoding process. When I do sampling, the noise estimate at each denoising step is a combination of noise estimates of class-conditioned and class-unconditioned.
+            <br><br>
+            Exactly the same as training the time-conditional model, I trained this model with 20 epochs and a batch size of 128. The computation cost using T4 GPU on google colab is 15 minutes.
+        </h4>
+        <hr>
+        <div class="partb_2_time_and_class_conditioning">
+            <div class="individual-image">
+                <img src="output_data/partb2/partb2.4_training_loss.png" height="500">
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="output_data/partb2/partb2.5_sampling_epoch5.png" height="1000">
+            </div>
+            <div class="take-place-as-an-image">
+                <p>Checkpoint Model Output 5th Epoch</p>
+            </div>
+            <hr>
+            <div class="individual-image">
+                <img src="output_data/partb2/partb2.5_sampling_epoch20.png" height="1000">
+            </div>
+            <div class="take-place-as-an-image">
+                <p>Checkpoint Model Output 20th Epoch</p>
+            </div>
+        </div>
+        <hr>
+        <h4>Above are test case outputs from the epoch 5 and epoch 20 models respectively. I generated five outputs for each class. As we can see, the two checkpoint models do not differ in performance by much. I think this is because the epoch 5 model already has a pretty low training loss (around the 2000th batch step) compared to the epoch 20 model. Maybe the epoch 5 model outperforms the epoch 20 model in generating digit 5. The epoch 20 model also just contains less noise other than the digit pixels.</h4>
 
     </div>
 </body>

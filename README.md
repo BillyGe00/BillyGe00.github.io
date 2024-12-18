@@ -7,4 +7,4 @@ You can view the portfolio website here: http://BillyGe00.github.io.
 * project 3: Face Morphing
 * project 4: Stitching Photo Mosaics
 * project 5: Diffusion Models
-* final project: Beautify Dog Faces
+* final project: Retouch Dog Eyes
